@@ -95,7 +95,7 @@ Vamos executar algumas operações matemáticas básicas diretamente no terminal
 3/3+1 # Observe como o R trata o parênteses na divisão
 3/(3+1)
 4^3  
-5%%3 # Resto da divisao
+5%%3 # Resto da divisão
 5%/%3 # Parte inteira da divisão
 ```
 # Variáveis no R

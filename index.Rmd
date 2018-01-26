@@ -1,5 +1,5 @@
 ---
-title: "Introdução ao R aplicado à Ciências Atmosféircas"
+title: "Introdução ao R aplicado às Ciências Atmosféricas"
 author: "Gabriel Perez - gabrielmpp2@gmail.com"
 ---
 

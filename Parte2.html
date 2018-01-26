@@ -125,7 +125,9 @@ $(document).ready(function () {
       <ul>
       <li><a href="#parte-2---instalacao-de-pacotes">Parte 2 - Instalação de pacotes</a><ul>
       <li><a href="#instalando-pacotes-do-cran">Instalando pacotes do CRAN</a></li>
+      <li><a href="#instalando-pacotes-via-github">Instalando pacotes via Github</a></li>
       </ul></li>
+      <li><a href="#analise-de-exploratoria-em-dados-de-estacoes-do-inmet">Análise de exploratória em dados de estações do INMET</a></li>
       </ul>
     </div>
 </div>
@@ -172,13 +174,186 @@ $(document).ready(function () {
 <div id="instalando-pacotes-do-cran" class="section level2">
 <h2>Instalando pacotes do CRAN</h2>
 <p>Os pacotes disponíveis no CRAN são os mais fáceis de instalar, o comando para isso é:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="dt">pkgs=</span><span class="st">&quot;nome do pacote&quot;</span>,<span class="dt">lib=</span><span class="st">&quot;diretorio do seu computador para instalar&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="dt">pkgs=</span><span class="st">&quot;nome do pacote&quot;</span>,<span class="dt">lib=</span><span class="st">&quot;diretorio&quot;</span>)
+
+<span class="co"># e para remover temos o comando equivalente:</span>
+<span class="kw">remove.packages</span>(<span class="dt">pkgs =</span> <span class="st">&quot;nome do pacote&quot;</span>,<span class="dt">lib=</span><span class="st">&quot;diretorio&quot;</span>)</code></pre></div>
+<p>Tentem instalar o pacote “devtools”.</p>
+</div>
+<div id="instalando-pacotes-via-github" class="section level2">
+<h2>Instalando pacotes via Github</h2>
+<p>O pacote devtools possibilita instalar pacotes diretamente do github. no github podemos encontrar pacotes que ainda não se encontram no CRAN ou baixar versões mais recentes e/ou em desenvolvimento.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(devtools)
+<span class="kw">install_github</span>(<span class="st">&quot;nome do repositorio&quot;</span>)</code></pre></div>
+<p>Em ocasiões muito específicas pode ser necessário compilar manualmente o código-fonte de algum pacote. Não vamos abordar essa situação pois cada pacote tem sua particularidade. Nesse caso o mais adequado é buscar um passo-a-passo na internet.</p>
+</div>
+</div>
+<div id="analise-de-exploratoria-em-dados-de-estacoes-do-inmet" class="section level1">
+<h1>Análise de exploratória em dados de estações do INMET</h1>
+<p>Para começarmos a fazer algumas análises estatísticas no R, vamos utilizar dados de estações automáticas do INMET. Os dados podem ser baixados no link abaixo:</p>
+<blockquote>
+<p><a href="https://drive.google.com/open?id=1LLE61RbQ1EhFpwSSZzTsAIN0kbVSZwxw" class="uri">https://drive.google.com/open?id=1LLE61RbQ1EhFpwSSZzTsAIN0kbVSZwxw</a></p>
+</blockquote>
+<p>Agora vamos criar um projeto no RStudio chamado “AnaliseINMET”. Uma vez criado o projeto, vamos mover os dados baixados para um diretório chamado “dados” dentro do diretório do projeto. Dessa forma o acesso fica mais simples. Abra um novo script no projeto e salve com algum nome como “analise.R”. Escolha uma estação e dentro do script, digite:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_sp &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;dados/inmet_saopaulo.txt&quot;</span>,<span class="dt">skip =</span> <span class="dv">16</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>, <span class="dt">sep =</span> <span class="st">&quot;;&quot;</span>, <span class="dt">row.names =</span> <span class="ot">NULL</span>)
+
+<span class="co"># se nossa tabela fosse um arquivo Excel, basta usar o comando read.csv</span>
+
+## digite somente &quot;df_sp&quot; no lugar do comando abaixo
+<span class="kw">kable</span>(<span class="kw">head</span>(df_sp))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Estacao</th>
+<th align="left">Data</th>
+<th align="right">Hora</th>
+<th align="right">TempBulboSeco</th>
+<th align="right">TempBulboUmido</th>
+<th align="right">UmidadeRelativa</th>
+<th align="right">PressaoAtmEstacao</th>
+<th align="right">DirecaoVento</th>
+<th align="right">VelocidadeVento</th>
+<th align="right">Nebulosidade</th>
+<th align="left">X</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">83781</td>
+<td align="left">01/01/1998</td>
+<td align="right">0</td>
+<td align="right">23.5</td>
+<td align="right">21.2</td>
+<td align="right">81</td>
+<td align="right">925.1</td>
+<td align="right">9</td>
+<td align="right">2.6</td>
+<td align="right">10</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">83781</td>
+<td align="left">01/01/1998</td>
+<td align="right">1200</td>
+<td align="right">25.3</td>
+<td align="right">21.6</td>
+<td align="right">71</td>
+<td align="right">925.2</td>
+<td align="right">5</td>
+<td align="right">1.3</td>
+<td align="right">8</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">83781</td>
+<td align="left">01/01/1998</td>
+<td align="right">1800</td>
+<td align="right">26.3</td>
+<td align="right">22.4</td>
+<td align="right">71</td>
+<td align="right">924.3</td>
+<td align="right">18</td>
+<td align="right">2.0</td>
+<td align="right">10</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">83781</td>
+<td align="left">02/01/1998</td>
+<td align="right">0</td>
+<td align="right">25.4</td>
+<td align="right">21.6</td>
+<td align="right">71</td>
+<td align="right">925.5</td>
+<td align="right">14</td>
+<td align="right">2.0</td>
+<td align="right">8</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="right">83781</td>
+<td align="left">02/01/1998</td>
+<td align="right">1200</td>
+<td align="right">26.8</td>
+<td align="right">21.3</td>
+<td align="right">60</td>
+<td align="right">924.9</td>
+<td align="right">27</td>
+<td align="right">2.3</td>
+<td align="right">9</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="right">83781</td>
+<td align="left">02/01/1998</td>
+<td align="right">1800</td>
+<td align="right">31.4</td>
+<td align="right">22.6</td>
+<td align="right">45</td>
+<td align="right">923.3</td>
+<td align="right">32</td>
+<td align="right">2.6</td>
+<td align="right">8</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<p>Surgiu uma coluna nomeada “X” com valores ausentes. Isso aconteceu pois o arquivo do INMET possui um último &quot; ; &quot; depois da última coluna de dados, e o R entende que depois dele virá uma nova coluna. Vamos removê-la:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_sp<span class="op">$</span>X &lt;-<span class="st"> </span><span class="ot">NULL</span>
+
+## Vamos remover o número da estação que não será útil
+
+df_sp<span class="op">$</span>Estacao &lt;-<span class="st"> </span><span class="ot">NULL</span>
+<span class="kw">summary</span>(df_sp)</code></pre></div>
+<pre><code>##          Data            Hora      TempBulboSeco   TempBulboUmido 
+##  01/01/1998:    3   Min.   :   0   Min.   : 6.00   Min.   : 4.80  
+##  01/01/1999:    3   1st Qu.:   0   1st Qu.:18.20   1st Qu.:15.60  
+##  01/01/2000:    3   Median :1200   Median :21.20   Median :17.90  
+##  01/01/2001:    3   Mean   : 990   Mean   :21.36   Mean   :17.68  
+##  01/01/2002:    3   3rd Qu.:1800   3rd Qu.:24.40   3rd Qu.:20.20  
+##  01/01/2003:    3   Max.   :1800   Max.   :35.90   Max.   :26.70  
+##  (Other)   :21498                  NA's   :2       NA's   :105    
+##  UmidadeRelativa  PressaoAtmEstacao  DirecaoVento   VelocidadeVento 
+##  Min.   : 10.00   Min.   :913.2     Min.   : 0.00   Min.   : 0.000  
+##  1st Qu.: 61.00   1st Qu.:923.9     1st Qu.: 9.00   1st Qu.: 1.600  
+##  Median : 75.00   Median :926.2     Median :14.00   Median : 2.500  
+##  Mean   : 71.15   Mean   :926.4     Mean   :17.07   Mean   : 2.623  
+##  3rd Qu.: 84.00   3rd Qu.:928.8     3rd Qu.:27.00   3rd Qu.: 3.300  
+##  Max.   :100.00   Max.   :939.3     Max.   :36.00   Max.   :12.000  
+##  NA's   :1        NA's   :3                         NA's   :9       
+##   Nebulosidade   
+##  Min.   : 0.000  
+##  1st Qu.: 6.000  
+##  Median : 9.000  
+##  Mean   : 7.342  
+##  3rd Qu.:10.000  
+##  Max.   :10.000  
+##  NA's   :6</code></pre>
+<p>Vamos fazer a média diária das variáveis. Para isso, vamos usar precisar manipular a coluna de datas. É conveniente neste momento usar o comando <code>sapply</code>. Esse comando faz parte de uma família de comandos cujo o objetivo é aplicar uma função a um data.frame, lista ou vetor.</p>
+<blockquote>
+<p>lapply e sapply</p>
+</blockquote>
+<p>Aplicam uma função a uma lista ou vetor. O <code>lapply</code> retorna uma lista e o <code>sapply</code> retorna um vetor.</p>
+<blockquote>
+<p>apply</p>
+</blockquote>
+<p>Aplica uma função nas colunas ou linhas de um data.frame</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># vamos criar colunas separadas para dia, mês e ano</span>
+df_sp<span class="op">$</span>dia &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(<span class="dt">x =</span> <span class="kw">as.character</span>(df_sp<span class="op">$</span>Data),<span class="dt">split =</span> <span class="st">&quot;/&quot;</span>),<span class="dt">FUN =</span> <span class="st">'['</span>,<span class="dv">1</span>)
+df_sp<span class="op">$</span>mes &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(<span class="dt">x =</span> <span class="kw">as.character</span>(df_sp<span class="op">$</span>Data),<span class="dt">split =</span> <span class="st">&quot;/&quot;</span>),<span class="dt">FUN =</span> <span class="st">'['</span>,<span class="dv">2</span>)
+df_sp<span class="op">$</span>ano &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="kw">strsplit</span>(<span class="dt">x =</span> <span class="kw">as.character</span>(df_sp<span class="op">$</span>Data),<span class="dt">split =</span> <span class="st">&quot;/&quot;</span>),<span class="dt">FUN =</span> <span class="st">'['</span>,<span class="dv">3</span>)
+
+<span class="co"># podemos escrever  o mesmo comando usando a sintaxe com %&gt;%, muitos usuários</span>
+<span class="co"># acreditam que essa sintaxe tem mais clareza</span>
+<span class="kw">library</span>(dplyr)
+df_sp<span class="op">$</span>dia &lt;-<span class="st"> </span>df_sp<span class="op">$</span>Data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.character</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">strsplit</span>(<span class="dt">split=</span><span class="st">&quot;/&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sapply</span>(<span class="dt">FUN=</span><span class="st">'['</span>,<span class="dv">1</span>)
+df_sp<span class="op">$</span>mes &lt;-<span class="st"> </span>df_sp<span class="op">$</span>Data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.character</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">strsplit</span>(<span class="dt">split=</span><span class="st">&quot;/&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sapply</span>(<span class="dt">FUN=</span><span class="st">'['</span>,<span class="dv">2</span>)
+df_sp<span class="op">$</span>ano &lt;-<span class="st"> </span>df_sp<span class="op">$</span>Data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.character</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">strsplit</span>(<span class="dt">split=</span><span class="st">&quot;/&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sapply</span>(<span class="dt">FUN=</span><span class="st">'['</span>,<span class="dv">3</span>)</code></pre></div>
 <p>FALAR DE APPLY, LAPPLY, MCLAPPLY (Parallel)</p>
 <p>cores&lt;-detectCores() pause &lt;- function(i) { function(x) Sys.sleep(i) }</p>
 <p>system.time(lapply(1:10, pause(0.25))) system.time(mclapply(1:10, pause(0.25), mc.cores = cores))</p>
 <p>olhar byte code compilation # Referências <a href="http://material.curso-r.com" class="uri">http://material.curso-r.com</a> <a href="http://adv-r.had.co.nz/" class="uri">http://adv-r.had.co.nz/</a></p>
 <p>falar de apply labbly mapply</p>
-</div>
 </div>
 </div>
 

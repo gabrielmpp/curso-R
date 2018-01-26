@@ -54,9 +54,87 @@ Vamos visitar o CRAN: https://cran.r-project.org/
 Os pacotes disponíveis no CRAN são os mais fáceis de instalar, o comando para isso é:
   
 ```{r,eval=FALSE}
-install.packages(pkgs="nome do pacote",lib="diretorio do seu computador para instalar")
+install.packages(pkgs="nome do pacote",lib="diretorio")
+
+# e para remover temos o comando equivalente:
+remove.packages(pkgs = "nome do pacote",lib="diretorio")
 ```
   
+  
+Tentem instalar o pacote "devtools".  
+  
+## Instalando pacotes via Github
+  
+O pacote devtools possibilita instalar pacotes diretamente do github. no github podemos encontrar pacotes que ainda não se encontram no CRAN ou baixar versões mais recentes e/ou em desenvolvimento.
+  
+
+```{r,eval=FALSE}
+library(devtools)
+install_github("nome do repositorio")
+
+```
+  
+  
+Em ocasiões muito específicas pode ser necessário compilar manualmente o código-fonte de algum pacote. Não vamos abordar essa situação pois cada pacote tem sua particularidade. Nesse caso o mais adequado é buscar um passo-a-passo na internet.
+
+  
+
+# Análise de exploratória em dados de estações do INMET
+  
+Para começarmos a fazer algumas análises estatísticas no R, vamos utilizar dados de estações automáticas do INMET. Os dados podem ser baixados no link abaixo:
+
+> https://drive.google.com/open?id=1LLE61RbQ1EhFpwSSZzTsAIN0kbVSZwxw
+
+Agora vamos criar um projeto no RStudio chamado "AnaliseINMET". Uma vez criado o projeto, vamos mover os dados baixados para um diretório chamado "dados" dentro do diretório do projeto. Dessa forma o acesso fica mais simples. Abra um novo script no projeto e salve com algum nome como "analise.R". Escolha uma estação e dentro do script, digite:  
+
+
+```{r}
+df_sp <- read.table("dados/inmet_saopaulo.txt",skip = 16, header = TRUE, sep = ";", row.names = NULL)
+
+# se nossa tabela fosse um arquivo Excel, basta usar o comando read.csv
+
+## digite somente "df_sp" no lugar do comando abaixo
+kable(head(df_sp))
+
+```
+  
+Surgiu uma coluna nomeada "X" com valores ausentes. Isso aconteceu pois o arquivo do INMET possui um último " ; " depois da última coluna de dados, e o R entende que depois dele virá uma nova coluna. Vamos removê-la:  
+  
+```{r}
+df_sp$X <- NULL
+
+## Vamos remover o número da estação que não será útil
+
+df_sp$Estacao <- NULL
+summary(df_sp)
+```
+  
+Vamos fazer a média diária das variáveis. Para isso, vamos usar precisar manipular a coluna de datas.  É conveniente neste momento usar o comando `sapply`. Esse comando faz parte de uma família de comandos cujo o objetivo é aplicar uma função a um data.frame, lista ou vetor.  
+  
+> lapply e sapply  
+  
+Aplicam uma função a uma lista ou vetor. O `lapply` retorna uma lista e o `sapply` retorna um vetor.  
+  
+> apply  
+  
+Aplica uma função nas colunas ou linhas de um data.frame  
+  
+
+```{r}
+# vamos criar colunas separadas para dia, mês e ano
+df_sp$dia <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',1)
+df_sp$mes <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',2)
+df_sp$ano <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',3)
+
+# podemos escrever  o mesmo comando usando a sintaxe com %>%, muitos usuários
+# acreditam que essa sintaxe tem mais clareza
+library(dplyr)
+df_sp$dia <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',1)
+df_sp$mes <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',2)
+df_sp$ano <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',3)
+
+```
+
 
 FALAR DE APPLY, LAPPLY, MCLAPPLY (Parallel)
 
