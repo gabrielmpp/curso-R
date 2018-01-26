@@ -1,5 +1,10 @@
 ---
-title: "About Me"
+title: "Curso de introdução ao R - IAG/USP 2018"
+author: "Gabriel Perez - gabrielmpp2@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: espresso
 ---
 
 Why I am awesome. 
