@@ -1,5 +1,6 @@
 ---
-title: "Gabriel's Website"
+title: "Introdução ao R aplicado à Ciências Atmosféircas"
+author: "Gabriel Perez - gabrielmpp2@gmail.com"
 ---
 
-Hello, World!
+Bem vindo ao curso de R do IAG/USP 2018
