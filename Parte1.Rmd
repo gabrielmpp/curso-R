@@ -1,5 +1,5 @@
 ---
-title: "Curso de introdução ao R - IAG/USP 2018"
+title: "Parte1"
 author: "Gabriel Perez - gabrielmpp2@gmail.com"
 date: "`r Sys.Date()`"
 output:
