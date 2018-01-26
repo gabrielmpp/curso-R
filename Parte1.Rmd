@@ -1,5 +1,5 @@
 ---
-title: "Parte1"
+title: ""
 author: "Gabriel Perez - gabrielmpp2@gmail.com"
 date: "`r Sys.Date()`"
 output:
@@ -88,7 +88,7 @@ Para inicializar o R em um terminal linux basta digitar "R". O console do R vai 
 R.version
 ```
 ## Operações matemáticas básicas
-Vamos executar algumas operações matemáticas básicas diretamento no terminal
+Vamos executar algumas operações matemáticas básicas diretamente no terminal
 ```{r}
 1+1 
 3*3 
@@ -475,3 +475,33 @@ Agora entre no console do R e execute o script com o comando `source(teste.R)`. 
 
 1 - Avalie a seguinte expressão no R:  
 $$\frac{\sqrt{(38^4+\frac{42}{\pi})}}{e^{2\pi+5}+2} $$
+
+2 - Sem rodar o código no R, avalie qual será o resultado da seguinte expressão:
+```{r,evak=FALSE}
+5%%2 + 14%/%3 + 2*2 == 9
+```
+
+3 - Posicione o parênteses na expressão anterior de forma a retornar o valor contrário.  
+  
+  
+4 - Por que o código abaixo retorna erro?
+```{r,eval=FALSE}
+x <- 4
+if(x = 4){
+  TRUE
+}
+```
+5 - Buck (1981) propôs equações empíricas para calcular a pressão de vapor de saturação da água líguida ($e_{sw}$) e do gelo ($e_{si}$):
+$$ e_{sw}(T)=0.61121^{(18.678-\frac{T}{234.5})(\frac{T}{257.14 +T})} $$ 
+$$ e_{si}(T)=0.61115^{(23.038-\frac{T}{333.7})(\frac{T}{279.82 +T})} $$ 
+Crie uma função no R que calcule a pressão de vapor de saturação para qualquer vetor de temperaturas entre -80ºC e 80ºC. Em seguida, faça um gráfico mostrando o comportamento das curvas neste intervalo.
+```{r,echo=FALSE,eval=FALSE}
+x<-rnorm(100,50,sd = 40)
+min<-x[1]
+for(i in 2:length(x)){
+  if(x[i]<min){
+    min<-x[i]
+  }
+}
+
+```

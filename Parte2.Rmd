@@ -1,0 +1,77 @@
+---
+title: ""
+author: "Gabriel Perez - gabrielmpp2@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: espresso
+---
+
+
+# Parte 2 - Instalação de pacotes
+
+Além dos recursos fornecidos no r-base, o R conta com mais de 10 mil pacotes disponíveis no CRAN e mais milhares disponíveis no Github. Os pacotes são essenciais para uma boa experiência com o R, pois podem:  
+  
+
+* facilitar a forma de programar;
+  
+    + dplyr (%>%)
+
+* acelerar o tempo de processamento;  
+  
+    + gpuR   
+
+    + Parallel
+  
+* melhorar os recursos gráficos;  
+  
+    + ggplot2
+    + raster e rasterVis
+    + fields
+    + lattice e latticeExtra
+  
+* gerar/resolver modelos complexos em uma linha de comando;  
+  
+    + caret
+    + h2o
+    + odesolve (equações diferenciais)
+  
+* diagramar notebooks como esse;  
+  
+    + RMarkdown
+  
+* integrar o R com outras linguagens;  
+  
+    + RCpp
+    + RFortran
+    + rJava
+  
+  
+Vamos visitar o CRAN: https://cran.r-project.org/  
+  
+## Instalando pacotes do CRAN  
+  
+Os pacotes disponíveis no CRAN são os mais fáceis de instalar, o comando para isso é:
+  
+```{r,eval=FALSE}
+install.packages(pkgs="nome do pacote",lib="diretorio do seu computador para instalar")
+```
+  
+
+FALAR DE APPLY, LAPPLY, MCLAPPLY (Parallel)
+
+cores<-detectCores()
+pause <- function(i) {
+  function(x) Sys.sleep(i)
+}
+
+system.time(lapply(1:10, pause(0.25)))
+system.time(mclapply(1:10, pause(0.25), mc.cores = cores))
+
+
+olhar byte code compilation
+# Referências
+http://material.curso-r.com
+http://adv-r.had.co.nz/ 
+
+falar de apply labbly mapply

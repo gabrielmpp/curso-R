@@ -7,3 +7,5 @@ navbar:
       href: index.html
     - text: "Parte 1"
       href: Parte1.html
+    - text: "Parte 2"
+      href: Parte2.html
