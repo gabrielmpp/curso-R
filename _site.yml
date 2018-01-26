@@ -1,9 +1,9 @@
-name: "gabriel-website"
+name: "Curso R"
 output_dir: "."
 navbar:
-  title: "Gabriel Website"
+  title: "Curso R "
   left:
     - text: "Home"
       href: index.html
-    - text: "About Me"
-      href: about.html
+    - text: "Parte 1"
+      href: parte1.html
