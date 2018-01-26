@@ -7,4 +7,471 @@ output:
     highlight: espresso
 ---
 
-Why I am awesome. 
+# Análise de inscritos
+
+Vamos usar o r-base e o dplyr para fazer uma breve análise do formulário de inscrição para o curso.
+
+Carregando as bibliotecas:
+```{r,message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+
+Em seguida vamos fazer a leitura da tabela e renomear as colunas. Note que o campo "linguagens" precisa de tratamento antes da análise.
+```{r}
+tabela <- read.csv("../USP.csv",sep=",",header=TRUE)
+tabela$Timestamp <- NULL
+names(tabela) <- c("e-mail","nome","posicao","linguagens","conhecimento","area","dados")
+kable(head(tabela,5))
+```
+
+Agora vamos utilizar a biblioteca dplyr para contabilizar as respostas e o ggplot2 para exibir os gráficos
+```{r}
+# aqui usamos o pipe %>%, similar ao | do shell para criar tabelas com os dados que queremos
+df_posic <- tabela %>% group_by(posicao) %>% summarise(no_rows=length(posicao))
+df_conhec <- tabela %>% group_by(conhecimento) %>% summarise(no_rows=length(conhecimento))
+
+
+# aqui usamos o ggplot2 para gerar os gráficos
+theme_set(theme_classic())
+
+pie <- ggplot(df_posic, aes(x = "", y=no_rows, fill = factor(posicao))) + 
+  geom_bar(width = 1, stat = "identity") +
+  theme(axis.line = element_blank(), 
+        plot.title = element_text(hjust=0.5)) + 
+  labs(fill="Posição", 
+       x=NULL, 
+       y=NULL, 
+       title="Posição acadêmica dos inscritos")
+
+pie + coord_polar(theta = "y", start=0)
+
+
+theme_set(theme_bw())
+ ggplot(df_conhec, aes(x = conhecimento, y=no_rows)) + 
+  geom_bar(width = 0.5, stat = "identity") +
+  theme(axis.line = element_blank(), 
+        plot.title = element_text(hjust=0.5)) + 
+  labs(x="Conhecimento", fill=NULL,
+       y="Número de inscritos", 
+       title="Conhecimento de programação dos inscritos")
+
+```
+```{r}
+
+#aqui usamos o grep do r-base para contabilizar as linguagens
+linguagens<-c("r","matlab","python","excel","vba","grads","spss","octave","fortran","idl")
+count<-vector(length=length(linguagens))
+i=1
+for(ling in linguagens){
+  count[i]=grep(x=tabela$linguagens,pattern=ling,ignore.case = TRUE) %>% length
+  i = i + 1
+}
+df_ling<-data.frame(linguagens,count)
+
+# aqui usamos a biblioteca treemapify em conjunto com o ggplot2 para gerar a visualização
+library(treemapify)
+
+
+ggplot(df_ling,aes(area=count,fill=count,label=linguagens)) + geom_treemap()+
+geom_treemap_text(colour="white",place="centre",grow=TRUE)+labs(title="Utilização das ferramentas")
+
+
+```
+
+# Parte 1 - Comandos básicos
+
+## Inicialização
+Para inicializar o R em um terminal linux basta digitar "R". O console do R vai abrir no terminal. As informações sobre a versão instalada ficam armazenadas na variável R.version
+```{r,}
+R.version
+```
+## Operações matemáticas básicas
+Vamos executar algumas operações matemáticas básicas diretamento no terminal
+```{r}
+1+1 
+3*3 
+3/3+1 # Observe como o R trata o parênteses na divisão
+3/(3+1)
+4^3  
+5%%3 # Resto da divisao
+5%/%3 # Parte inteira da divisão
+```
+# Variáveis no R
+## Atribuição de valor
+Para atribuir um valor a uma variável no R é possível usar dois símbolos:  
+ =  
+ <-  
+A seta para a esquerda é considerada mais elegante e eventualmente mais correta pois pode evitar ambiguidades com outros usos da igualdade.
+```{r}
+x <- 1
+y = 1
+```
+## Variáveis atômicas
+Variáveis contendo somente um valor são chamadas de "atômicas". Existem cinco tipos de objetos atômicos no R  
+  
+  
+* character  
+```{r}
+x <- "hello world"
+```
+
+* numeric  
+```{r}
+y <- 22.736
+```
+  
+* integer  
+```{r}
+z <- 1L
+```
+  
+* complex  
+```{r}
+im <- 2+5i
+```
+
+* logic  
+
+Os valores lógicos TRUE e FALSE podem ser abreviados por T e F. 
+```{r}
+l <- TRUE 
+L <- FALSE 
+```
+  
+* Valores especiais  
+
+NA: Dado faltante o indisponível. O NA possui classe, ele pode ser numeric, character etc.  
+
+  
+NaN: Not a Number. Representa indefinições matemáticas como 0/0 e log(-1). Um NaN é NA mas a recíproca não é verdadeira.  
+  
+  
+Inf ou -Inf: um número muito grande ou o limite numérico do R: 10^310 
+  
+  
+NULL: Semelhante ao NA representa ausência de informação. Entretanto o NA é aplicado  no contexto de dados e o NULL no contexto da lógica de programação.  
+
+A função "class" retorna a classe de um objeto
+```{r}
+class(x)
+class(y)
+class(z)
+class(im)
+class(l)
+```
+E podemos fazer operações com as variáveis criadas. Somente a variável do tipo character não pode ser usada em operações matemáticas.
+```{r}
+y + z
+z + im
+z + l # note que TRUE equivale a 1 quando somado
+z + L # e FALSE equivale a zero
+na<-NA
+z + na # para qualquer operação feita com um NA o resultado é NA
+#x + y # variável do tipo character não pode ser usado em operações
+
+```
+Para verificar se uma variável pertence a uma determinada classe, basta utilizar o comando is."classe", por exemplo:
+```{r}
+is.character(z)
+is.complex(im)
+```
+
+
+## Vetores
+Os vetores são os objetos multi-dimensionais mais simples e podem guardar objetos atômicos. Não é recomendado usar um vetor para armazenar variáveis de classes diferentes pois o vetor deve ter uma classe única, seguindo a seguinte hierarquia:
+  
+
+character > complex > numeric > integer > logic 
+```{r}
+v1 <- c(1,10,20,2,7)
+v2 <- c("c","hello")
+v3 <- c(2,3)
+v4 <- c(x,y,z,l)
+class(v4) 
+```
+Os vetores no R são indexados com colchetes [ ]. É possível selecionar várias posições do vetor desejado
+```{r}
+v1[3]
+v1[c(1,3,5)]
+```
+As operações em vetores são realizadas de maneira sequencial, elemento por elemento.
+```{r}
+v1+20
+v1/10
+v1/v3 # Nesse caso o R vai repetir o vetor menor até que tenha o mesmo tamanho do vetor maior
+```
+## Convertendo classes
+
+É possível coergir o R a alterar a classe de uma variável ou vetor qualquer. Quando não for possível fazer a coerção exigida, o R introduzirá NAs como saída.
+```{r}
+v1 <- c(0L,1L,2L,3L,4L)
+class(v1)
+as.numeric(v1)
+as.logical(v1)
+as.character(v1)
+v2 <- c("a","b","c","d")
+as.numeric(v2)
+```
+## Gerando repetições automáticas
+O R possui uma série de comandos para gerar sequências automaticamente. Os mais básicos são:  
+o ":" gera uma sequência com intervalos de tamanho 1  
+o "seq" gera uma sequência com qualquer intervalo. Esse comando pode ser usado para gerar sequências de datas.  
+o "rep" gera uma repetição de tamanho definido  
+
+
+```{r}
+1:4
+seq(from=1,to=10,by=0.5) # podemos omitir "from" "to" e "by"
+seq(as.Date("1991-01-01"),as.Date("1991-03-01"),"days")
+rep("hey",10)
+```
+O comprimento de um vetor pode ser extraído com o comando "length":
+```{r}
+length(v1)
+```
+
+
+## Matrizes
+As matrizes tem as mesmas propriedades dos vetores. Podemos gerar uma matriz com o comando "matrix".
+```{r}
+m <- matrix(1:9, ncol=3, nrow=3)
+m
+```
+As matrizes são indexadas com colchetes da mesma maneira que os vetores:
+```{r}
+m[1,]  # primeira linha
+m[,1]  # primeira coluna
+m[3,3] # última posição da matriz
+```
+Algumas operações com matrizes:  
+Transposta:
+```{r}
+t(m)
+```
+
+Multiplicação matricial:
+```{r}
+n <- m*3+1
+m %*% n
+```
+As dimensões da matriz podem ser obtidas com os comandos nrow e ncol ou com o comando dim
+```{r}
+nrow(m)
+ncol(m)
+dim(m)
+```
+
+
+## Listas 
+
+Listas são um tipo particular de variável do R. Elas são extremamente úteis pois podem armazenar variáveis de QUALQUER classe e tamanho.
+```{r}
+lista <- list(1:20,TRUE,"Z",4i+5)
+```
+As posições das listas são indexadas com dois colchetes "[[ ]]". A posição das variáveis internas à lista podem ser indexadas com o colchete simples após o duplo.
+```{r}
+lista[[2]]
+lista[[1]][10]
+```
+As posições da lista podem ser nomeadas e acessadas com o símbolo "$"
+```{r}
+lista <- list(sequencia=1:20,logico=TRUE,caractere="Z",complexo=4i+5)
+lista$complexo
+```
+
+## data.frame
+data.frames no R são equivalentes à tabelas do Excel ou do SQL. Em muitos casos os dados que trabalharemos serão armazenados em variáveis tipo data.frame.  
+  
+data.frames são um tipo especial de lista onde cada elemento possui o mesmo tamanho. Mas, como as listas, os elementos podem ter classes diferentes. Cada elemento dessa lista pode ser visto como a coluna desta tabela e o comprimento como as linhas.  
+  
+A grande diferença a ser observada entre matrizes e data.frames é que as colunas dos data.frames podem ser de classes diferentes e as colunas das matrizes devem ser da mesma classe. Uma matriz pode ser convertida para data.frame da seguinte maneira:
+
+```{r}
+df <- as.data.frame(m)
+df
+```
+Como as colunas da matriz não possuem nomes o R atribuiu os nomes "V1", "V2" e "V3" para cada coluna. Podemos atribuir nomes para o data.frame com o comando names:
+```{r}
+names(df) <- c("Coluna1","Coluna2","Coluna3")
+df
+```
+Outros comandos úteis para manipulação de data.frames:
+```{r}
+head(df, 6)  # Exibe os N primeiros itens. Se N não for definido o R exibe os 6 primeiros items  
+tail(df) # Exibe os N últimos itens
+dim(df) # Exibe o número de linhas e colunas
+str(df) # Exibe a estrutura do data.frame
+cbind(df) # Acopla duas tabelas lado a lado
+rbind(df) # Empilha duas tabelas
+```
+
+O R possui alguns data.frames para fins didáticos já armazenados na memória. Vamos começar explorando o dataset iris que contém informações sobre as pétalas e as sépalas de diferentes espécies de plantas. Esse dataset foi criado pelo biólogo Fischer que o utilizou para desenvolver diversas técnicas estatísticas que usamos até hoje.
+
+```{r}
+kable(iris)
+```
+  
+  
+Uma primeira inspeção sobre o data.frame pode ser feita com o comando summary: 
+
+```{r}
+summary(iris)
+
+```
+  
+Para selecionar uma coluna do data.frame é possível utilizar os colchetes `iris[,2]`, como no caso das matrizes,  ou usar o cifrão como o nome da coluna `iris$Sepal.Width`. Experimente usar as funções `mean` e `quantile()` e comparar com o comando `summary()`.  
+  
+  
+# Plots com o R-base
+
+O R pode produzir plots sem o auxílio de outros pacotes gráficos. Esses plots são simples de produzir, no entanto, os recursos visuais muito limitados.  
+
+```{r}
+plot(x=iris$Sepal.Length,y=iris$Petal.Length)
+## Alterando o nome dos eixos
+plot(x=iris$Sepal.Length,y=iris$Petal.Length,xlab="Compr. Sépala",ylab="Compr. Pétala")
+## Alterando limites dos eixos
+plot(x=iris$Sepal.Length,y=iris$Petal.Length,xlab="Compr. Sépala",ylab="Compr. Pétala",
+     xlim=c(1,10),ylim=c(1,10))
+## Colorindo os pontos com as espécies
+plot(x=iris$Sepal.Length,y=iris$Petal.Length,xlab="Compr. Sépala",ylab="Compr. Pétala",
+     col=iris$Species)
+## Histograma
+hist(iris$Sepal.Length)
+
+```
+
+
+
+# Criando um script
+
+Vamos agora voltar para o shell e criar um Rscript utilizando um editor de texto (nano, gedit, nedit etc)
+  
+
+nano teste.R
+
+
+Dentro do script vamos digitar a linha abaixo, salvar e fechar o arquivo.
+```{r}
+seq(1,10,0.2)
+```
+  
+Para executar o script digitamos no terminal do linux:  
+  
+  
+
+Rscript teste.R
+
+  
+  
+Ou ainda, se estivermos dentro do console do R, podemos executar o conteúdo de um script com o comando `source("teste.R")`.
+  
+
+# Controladores de fluxo
+
+Agora que aprendemos a criar um script vamos aprender a utilizar os controladores lógicos de fluxo. Vamos voltar a editar o script e digitar o seguinte código:  
+
+## IF e ELSE
+```{r, eval=FALSE}
+x <- as.numeric(readline())
+if (x %% 2 == 0){
+  "O número é par"
+} else {
+  "O número é impar"
+}
+
+```
+Agora vamos salvar o script e executá-lo novamente no terminal.  
+
+Ainda é possível usar a combinação "else if"
+```{r,eval=FALSE}
+x <- as.numeric(readline())
+if (x>0){
+  "O número é positivo"
+} else if (x<0){
+  "O número é negativo"
+} else {
+  "O número é 0"
+}
+```
+## IFELSE
+
+O IFELSE é um controlador de fluxo particular do R. Ele trabalha de maneira vetorizada e possui um desempenho computacional melhor do que se fosse executado com FOR e IF. Note que ele executa um loop no vetor X sem a necessidade de índices. 
+
+```{r}
+X <- seq(1,50,1)
+ifelse(X%%2==0,"par","ímpar")
+```
+
+
+## WHILE e FOR
+O WHILE é um controlador de fluxo que executa uma repetição até que certa condição seja atendida
+```{r}
+i = 1
+soma = 0
+while(i<=10){
+  soma<-soma+i
+  i=i+1
+}
+soma
+```
+O FOR executa a repetição sobre uma sequência. Seu funcionamento é semelhante ao FOR do shell.
+```{r}
+x <- 1:10
+soma <- 0
+for(i in x){
+  soma <- soma + x[i]
+}
+soma
+```
+É possível verificar esses resultados usando a função "sum" do R.
+```{r}
+sum(1:10)
+```
+
+Dentro dos controladores de fluxo é possível utilizar um dos seguintes operadores lógicos:
+```{r,echo=FALSE}
+tabela<-data.frame(Operador=c("x<y","x<=y","x>y","x>=y","x==y","x!=y","!x","x | y",
+                              "x & y","xor(x,y)")
+                     
+                     ,Descricao=c("x é menor que y?","x é menor ou igual a y?",
+                   "x é maior que y?","x é maior ou igual a y?","x é igual a y?",
+                   "x é diferente de y?","negativa de x","x ou y são verdadeiros?",
+                   "x e y são verdadeiros?","x ou y são verdadeiros (apenas um)"))
+kable(tabela)
+```
+  
+  
+# Funções 
+  
+
+O R vem com muitas funções implementadas e muitas vezes otimizadas para melhor utilizar os recursos do processador. Por isso, é muito conveniente já utilizar as funções nativas do R. Por exemplo:  
+
+```{r}
+mean(1:10)
+round(pi)
+round(mean(1:10))
+```
+
+Mas, frequentemente precisamos escrever nossas próprias funções. Vamos voltar a editar o script teste.R:
+
+```{r}
+somaEntreValores<-function(x=0,y,interval=1){ #se x nao for definido o valor default é 0
+S <- seq(x,y,interval)
+soma <- 0
+for(i in 1:length(S)){
+  soma <- soma + S[i]
+}
+return(soma)
+}
+```
+
+Agora entre no console do R e execute o script com o comando `source(teste.R)`. A função `somaEntreValores` foi carregada e está no ambiente global do R. Execute esta função e compare sua saída com a função nativa `sum`.
+
+
+# Exercícios Parte 1
+
+1 - Avalie a seguinte expressão no R:  
+$$\frac{\sqrt{(38^4+\frac{42}{\pi})}}{e^{2\pi+5}+2} $$
