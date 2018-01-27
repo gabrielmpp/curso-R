@@ -9,3 +9,6 @@ navbar:
       href: Parte1.html
     - text: "Parte 2"
       href: Parte2.html
+output:
+  html_document:
+    css: style.css
