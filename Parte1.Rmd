@@ -4,7 +4,7 @@ author: "Gabriel Perez - gabrielmpp2@gmail.com"
 date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
-    highlight: espresso
+    highlight: kate
 ---
 
 # Análise de inscritos

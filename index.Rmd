@@ -1,6 +1,11 @@
 ---
-title: "Introdução ao R aplicado às Ciências Atmosféricas"
+title: "  "
 author: "Gabriel Perez - gabrielmpp2@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
 ---
 
-Bem vindo ao curso de R do IAG/USP 2018
+
+__Bem vindo ao curso de R do IAG/USP 2018__

@@ -4,7 +4,7 @@ author: "Gabriel Perez - gabrielmpp2@gmail.com"
 date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
-    highlight: espresso
+    highlight: kate
 ---
 
 
@@ -30,7 +30,7 @@ Além dos recursos fornecidos no r-base, o R conta com mais de 10 mil pacotes di
     + fields
     + lattice e latticeExtra
   
-* gerar/resolver modelos complexos em uma linha de comando;  
+* gerar modelos / resolver equações em uma linha de comando;  
   
     + caret
     + h2o
@@ -47,7 +47,7 @@ Além dos recursos fornecidos no r-base, o R conta com mais de 10 mil pacotes di
     + rJava
   
   
-Vamos visitar o CRAN: https://cran.r-project.org/  
+> Vamos visitar o CRAN: https://cran.r-project.org/  
   
 ## Instalando pacotes do CRAN  
   
@@ -119,21 +119,116 @@ Aplicam uma função a uma lista ou vetor. O `lapply` retorna uma lista e o `sap
   
 Aplica uma função nas colunas ou linhas de um data.frame  
   
+> mcapply
+  
+Vale ainda mencionar o `mcapply` da biblioteca parallel. Esse comando possui a mesma funcionalidade do apply e possibilita controlar quantos núcleos do processador serão utilizados
+  
 
 ```{r}
-# vamos criar colunas separadas para dia, mês e ano
-df_sp$dia <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',1)
+# vamos criar colunas separadas para dia, mês e ano usando o strsplit e o sapply
+
+# primeiro testem o comando strsplit e vejam a saída, removam o # da linha abaixo
+# strsplit(x = as.character(df_sp$Data),split = "/")
+
 df_sp$mes <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',2)
 df_sp$ano <- sapply(strsplit(x = as.character(df_sp$Data),split = "/"),FUN = '[',3)
 
 # podemos escrever  o mesmo comando usando a sintaxe com %>%, muitos usuários
-# acreditam que essa sintaxe tem mais clareza
+# argumentam que essa sintaxe possui mais clareza
+
 library(dplyr)
-df_sp$dia <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',1)
 df_sp$mes <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',2)
 df_sp$ano <- df_sp$Data %>% as.character() %>% strsplit(split="/") %>% sapply(FUN='[',3)
 
 ```
+  
+  
+Agora temos a data separada em colunas, podemos fazer médias diárias, mensais e anuais. Para isso podemos usar o comando `aggregate`.  A função aggregate aceita objetos do tipo __fórmula__ como padrão de agregamento. Veja `help(stats::aggregate)`.
+  
+```{r}
+temp_mensal <- aggregate(TempBulboSeco ~ mes + ano, data = df_sp, mean)
+kable(temp_mensal) #digite somente temp_mensal 
+plot(temp_mensal)
+plot(temp_mensal$TempBulboSeco,type="l")
+```
+
+Agora vamos colocar as datas no eixo X e arrumar os nomes dos eixos.  
+  
+```{r}
+datas <- seq(as.Date("1998-01-01"),as.Date("2017-12-31"),by="month")
+plot(x=datas, y=temp_mensal$TempBulboSeco, xlab = "Data", ylab = "Temperatura ºC",type = "l")
+```
+
+___Exercício___ 
+  
+Faça o mesmo processo para obter um vetor com as médias diárias e um vetor com a temperatura média de cada mês (12 valores). Faça os plots correspondentes com as datas no eixo x.  
+  
+## Transformada de Fourier
+  
+Os plots preliminares revelam que existem oscilações periódicas nas variáveis observadas. É natural tentar entender quais são as frequências dominantes nessas séries temporais.  
+  
+Vamos explorar a função nativa do r `spec.pgram`:
+```{r}
+help("spec.pgram")
+
+```
+  
+  
+Notem que a função `spec.pgram` espera como entrada uma variável do tipo "time series". Vamos transformar nosso vetor de observações em uma variável `ts`.  
+  
+
+```{r}
+ts_temp_sp <- ts(temp_mensal$TempBulboSeco,start = 1998, end = 2018, frequency = 12) 
+class(ts_temp_sp)
+plot(ts_temp_sp) # Note que ao plotar uma variável ts o eixo x já recebe corretamente as datas
+
+# É uma boa prática normalizar a ts antes de fazer a transformada de foutier
+ts_temp_sp <- (ts_temp_sp - mean(ts_temp_sp)) / max(ts_temp_sp)
+fft_temp <- spec.pgram(ts_temp_sp, frequency  = 12, plot=FALSE)
+
+# Vamos examinar o objeto fft_temp
+fft_temp
+
+# O objeto é uma lista onde "spec" contém a potência de cada frequência "freq"
+# Para obter o período basta inverter a frequência
+
+fft_temp$period <- 1/fft_temp$freq
+
+plot(x = fft_temp$period, y = fft_temp$spec,type = "l")
+
+# Por último, vamos criar um data.frame com as informações relevantes da transformada
+
+df_fft_temp <- data.frame(period = fft_temp$period, spec = fft_temp$spec)
+
+```
+  
+  
+Naturalmente, o plot mostra que o período anual é o mais importante para a temperatura. No entanto, vamos gerar uma tabela com os períodos mais importantes em ordem decrescente.  
+  
+> Tarefa: Vamos procurar no Google como ordenar uma tabela no R usando os valores de uma coluna. Queremos ordenar
+> nossa tabela fft_temp com a coluna spec
+
+```{r,echo=FALSE,eval=FALSE}
+"how to sort a dataframe by columns in R - stackoverflow"
+```
+
+> O que os períodos mais energéticos podem nos dizer?
+
+```{r,echo=FALSE}
+library(plyr); library(dplyr)
+
+
+kable(head(arrange(df_fft_temp, desc(spec)),10))
+
+```
+
+
+
+
+
+## Matriz de correlação
+  
+## Regressão linear 
 
 
 FALAR DE APPLY, LAPPLY, MCLAPPLY (Parallel)
