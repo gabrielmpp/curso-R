@@ -6,6 +6,12 @@ output:
   rmdformats::readthedown:
     highlight: kate
 ---
-
-
-__Bem vindo ao curso de R do IAG/USP 2018__
+  
+  
+  
+  
+__Bem vindo ao curso de R do IAG/USP 2018__  
+  
+  
+  
+![](R.png)
