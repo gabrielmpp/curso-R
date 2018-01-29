@@ -17,6 +17,12 @@ nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps0
 
 ```
 
-# Raster
+# Raster  
+  
+É possível fazer análises e plots com os arquivos netcdf no R, no entanto, este não é o formato mais apropriado pois os arquivos ocupam muito espaço na memória e o processamento não é eficiente.  
+  
+A maneira mais eficiente de trabalhar com arquivos netcdf no R é utilizando o pacote "raster". Raster é um tipo de arquivo muito utilizado para dados geoespaciais. Vamos explorar essa referência:  
+  
+http://www.datacarpentry.org/R-spatial-raster-vector-lesson/
 # ShapeFiles
 # Recortando rasters

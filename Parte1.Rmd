@@ -477,7 +477,7 @@ Agora entre no console do R e execute o script com o comando `source(teste.R)`. 
 $$\frac{\sqrt{(38^4+\frac{42}{\pi})}}{e^{2\pi+5}+2} $$
 
 2 - Sem rodar o código no R, avalie qual será o resultado da seguinte expressão:
-```{r,evak=FALSE}
+```{r,eval=FALSE}
 5%%2 + 14%/%3 + 2*2 == 9
 ```
 
