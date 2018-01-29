@@ -7,6 +7,16 @@ output:
     highlight: kate
 ---
 # Abrindo um NetCDF no R
+
+O pacote ncdf4 faz uma interface com a biblioteca netcdf que deve estar compilada no computador para a execução do pacote. Vamos examinar um arquivo netcdf.
+
+```{r}
+library(ncdf4)
+
+nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps005.nc")
+
+```
+
 # Raster
 # ShapeFiles
 # Recortando rasters
