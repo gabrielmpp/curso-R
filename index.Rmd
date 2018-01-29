@@ -14,8 +14,10 @@ date: "`r Sys.Date()`"
 # Referências principais  
 
 http://material.curso-r.com  
+  
 
 http://adv-r.had.co.nz/   
+  
 
 http://r-statistics.co/
 

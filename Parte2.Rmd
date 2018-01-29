@@ -415,7 +415,16 @@ print(g)
 
 # Aprimorando os gráficos com o ggplot2
   
-O `ggplot2` é um pacote tão grande do R que quase poderia ser considerado outra linguagem.
-http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html 
+O `ggplot2` é um pacote tão grande do R que quase poderia ser considerado outra linguagem. Vamos seguir os tutoriais abaixo. 
+  
+
+http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html   
+  
+
 http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+  
+  
+# Exercício  
+  
+Reproduza os plots da parte 3 usando o ggplot2 e pense em um novo plot baseado nas ideias do top50.
 
