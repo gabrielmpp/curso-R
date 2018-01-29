@@ -98,7 +98,7 @@ Vamos executar algumas operações matemáticas básicas diretamente no terminal
 5%%3 # Resto da divisão
 5%/%3 # Parte inteira da divisão
 ```
-# Variáveis no R
+# Estruturas dedados no R
 ## Atribuição de valor
 Para atribuir um valor a uma variável no R é possível usar dois símbolos:  
  =  

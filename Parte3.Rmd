@@ -1,0 +1,12 @@
+---
+title: ""
+author: "Gabriel Perez - gabrielmpp2@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
+# Abrindo um NetCDF no R
+# Raster
+# ShapeFiles
+# Recortando rasters

@@ -215,7 +215,7 @@ Naturalmente, o plot mostra que o período anual é o mais importante para a tem
 > O que os períodos mais energéticos podem nos dizer?
 
 ```{r,echo=FALSE}
-library(plyr); library(dplyr)
+library(dplyr)
 
 
 kable(head(arrange(df_fft_temp, desc(spec)),10))
@@ -223,28 +223,199 @@ kable(head(arrange(df_fft_temp, desc(spec)),10))
 ```
 
 
-
-
-
 ## Matriz de correlação
   
+A matriz de correlação é uma ferramenta útil na análise exploratória de uma base de dados e quantifica a relação linear entre todas as variáveis da tabela. No R, o comando é o seguinte:  
+  
+```{r, eval = FALSE}
+cor(x, method = c("pearson","kendall","spearman")) 
+# o método default é o pearson, mas podemos escolher entre os três
+```
+  
+A correlação de Pearson é dada pela seguinte equação:  
+$$ r_{xy} = \frac{Cov(X,Y)}{S_xS_y} = \frac{\sum(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum(x_i-\bar{x})^2(y_i-\bar{y})^2}}$$
+Onde $S$ é o desvio padrão.  
+  
+Agora vamos analisar nosso data.frame `df_sp`. Devemos inicialmente remover as colunas com valores não numéricos.  
+```{r}
+names(df_sp)
+df_sp_num <- df_sp[,c(-1,-2,-10,-11)]
+cor(df_sp_num)
+```
+
+Todas as correlações resultaram como `NA` pois existem valores faltantes na tabela. Uma possível solução para isso é usar a função `na.omit`.  
+```{r}
+m_cor <- df_sp_num %>% na.omit() %>% cor()
+# m_cor <- cor(na.omit(df_sp_num))
+
+kable(m_cor,digits = 2)
+```
+
+__Para discutir__  
+  
+  
+    - Por que a temperatura e a direção do vento se correlacionam positivamente?  
+    
+    - Por que a temperatura e a nebulosidade se correlacionam negativamente?  
+    
+    - Por que a temperatura e a umidade relativa se correlacionam negativamente?  
+      
+    
+
 ## Regressão linear 
 
+Modelagem estatística talvez seja o ponto mais forte do R. O pacote nativo `stats` conta com uma ampla coleção de técnicas e modelos. Entretanto, existem pacotes que expandem as capacidades do R e possibilitam a utilização de técnicas modernas e altamente eficientes do ponto de vista computacional. Quem deseja trabalhar com modelos mais complexos vale a pena investigar pacotes como keras, caret, h2o e mxnet.  
+  
+Vamos começar trabalhando com os comandos nativos.  
+  
+```{r}
+names(df_sp)
 
-FALAR DE APPLY, LAPPLY, MCLAPPLY (Parallel)
+df_lm <- df_sp[ , c(3,4,5,6,7,8,9)]
 
-cores<-detectCores()
-pause <- function(i) {
-  function(x) Sys.sleep(i)
+### Agora vamos normalizar nosso dataframe usando apply
+
+normalize <- function (x) {
+  x/max(x,na.rm = TRUE)
 }
 
-system.time(lapply(1:10, pause(0.25)))
-system.time(mclapply(1:10, pause(0.25), mc.cores = cores))
+df_lm <- as.data.frame(apply(df_lm, 2, normalize)) # estamos aplicando o as.data.frame pois o apply retorna uma matriz
+
+modLinear <- lm(Nebulosidade ~ UmidadeRelativa, data = df_lm)
+
+```
+  
+
+> Agora vamos interpretar a regressão  
+  
+
+```{r}
+
+summary(modLinear)
+
+```
+  
+Volte na tabela de correlação e compare o coeficiente de pearson com o R².  
+  
+É possível plotar a reta da regressão linear:  
+  
+```{r}
+plot(x = df_lm$UmidadeRelativa, y = df_lm$Nebulosidade, xlim = c(0,2), ylim = c(0,2)) 
+abline(a = modLinear$coefficients[1], b = modLinear$coefficients[2], col = "red")
+```
+
+O gráfico ficou horrível! Isso acontece pois a nebulosidade é uma variável não-contínua. Os valores são categóricos (discretos), mas possuem um sentido de ordem, sendo 0 o caso sem nuvens e 1 a situação overcast. Portanto, embora não seja a melhor opção, é possível obter alguma informação através da regressão linear.  
+  
+__Atividade__
+  
+
+Aplique a regressão linear múltipla considerando todas as variáveis do `df_lm` e interprete a saída da função `summary`. Dica: é necessário adaptar a fórmula da função `lm()`. Se não encontrar ajuda na documentação da função, busque no Google.  
+  
+## Regressão logística  
+  
+Como vimos no plot anterior, a variável nebulosidade não é contínua e uma regressão linear apresenta uma saída contínua, portanto não é o método mais adequado. A regressão logística, no entanto, funciona como um classificador linear e é mais adequado à variáveis categóricas. A função logística pode ser dada por:  
+  
+$$f(y)=\frac{1}{1+e^{-y}} $$
+
+A regressão logística consiste em aplicar a função logística em um modelo linear $y=ax+b$. 
+  
+$$f(ax+b)=\frac{1}{1+e^{-ax-b}} $$
+As constantes a e b podem ser encontradas invertendo a função logística e aplicando o método dos mínimos quadrados.  
+  
+
+A saída da função logística pode ser interpretada como a probabilidade de um evento ocorrer. Embora a função seja não-linear, o classificador é linear pois é definido um threshold (limiar) de decisão, em geral esse limiar é 0.5. Veja o gráfico da função logística:  
+  
+```{r,echo=FALSE}
+logistic <- function (x) {1/(1+exp(-x))}
+x <- seq(-10,10,0.01)
+y <- logistic(x)
+temp<-data.frame(x,y)
+theme_set(theme_bw())
+
+ ggplot(temp, aes(x = x, y=y)) + 
+  geom_line() +
+  theme(axis.line = element_blank(), 
+        plot.title = element_text(hjust=0.5)) + 
+  labs(x="X", fill=NULL,
+       y="Y", 
+       title="Função Logística")
+```
+  
+A regressão logística pode ser computada pelo comando glm do pacote stats (nativo). Essa função é uma extensão mais flexível do lm.  
+
+```{r}
+df_lm$Nebulosidade <- as.factor(df_lm$Nebulosidade)
+logisticReg <- glm(Nebulosidade ~  . , data = df_lm, family = binomial(link="logit"))
+```
+  
+## Análise de componentes principais (PCA)
+  
+A PCA é uma transformação linear ortogonal (W) que projeta os dados (X) em uma base onde as variáveis não possuem correlação linear (Z).  As colunas de W são os autovetores da matriz de covariância de X.
+$$Z_{n,m} = X_{n,m}W{m,m}$$
+A PCA é útil para (1) reduzir a dimensão da base de dados (2) encontrar os padrões lineares dominantes na série.  
+  
+Vamos então aplicar a PCA com a função `prcomp` no nosso dataframe `df_sp`.  Como o ciclo diurno vai causar um sinal muito forte, vamos pegar somente o horário das 18Z.
+  
+```{r}
+# Vamos informar para o R que a coluna de "Data" do df_sp realmente se trata de variáveis tipo date
+df_sp$Data<-as.Date(df_sp$Data,format="%d/%m/%Y")
 
 
-olhar byte code compilation
-# Referências
-http://material.curso-r.com
-http://adv-r.had.co.nz/ 
+df_pca <- df_sp[which(df_sp$Hora=="1800"),c(1,3,4,5,6,7,8,9)] 
 
-falar de apply labbly mapply
+# Pegar somente as linhas sem observações faltantes (NA)
+
+mask <- complete.cases(df_pca)
+df_pca <- df_pca[mask,]
+
+# Vamos transformar as colunas do df_pca em variáveis numéricas
+
+df_pca_numeric <- apply(df_pca[,-1],2,as.numeric)
+
+pca <- prcomp(df_pca_numeric, center = TRUE, scale = TRUE)
+summary(pca)
+
+```
+  
+Observe que com 5 componentes já é possível explicar mais de 90% da variância da série.  
+  
+```{r}
+plot(pca, type="l")
+```
+
+Para prever as componentes principais de novas observações ou das observações que usamos para calcular a PCA podemos utilizar a função predict:  
+    
+```{r}
+PCA <- predict(pca, df_pca)
+# precisamos remover os dias ocorreram dados ausentes do vetor de datas 
+plot(PCA[,1], x = df_pca$Data, type = "l", xlab = "Data", ylab = "PCA1")
+```
+O ciclo anual aparece de maneira evidente na primeira componente principal.  
+  
+Um biplot é útil para extrair informações das componentes principais. Para isso vamos usar o pacote gráfico `ggplot2` e o pacote auxiliar `ggbiplot` que deve ser instalado do github:  
+  
+```{r,eval=FALSE}
+library(devtools)
+install_github("vqv/ggbiplot")
+```
+
+```{r}
+library(ggplot2)
+library(ggbiplot)
+mes <- format(df_pca$Data,"%m")
+  
+g <- ggbiplot(pca, obs.scale = 1, var.scale = 3,var.axes = TRUE,
+              groups = mes,alpha = 0.3, 
+              ellipse = TRUE) 
+g <- g + scale_color_discrete(name = '')
+g <- g + theme(legend.direction = 'horizontal',
+               legend.position = 'top')
+print(g)
+```
+
+# Aprimorando os gráficos com o ggplot2
+  
+O `ggplot2` é um pacote tão grande do R que quase poderia ser considerado outra linguagem.
+http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html 
+http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+

@@ -2,16 +2,21 @@
 title: "  "
 author: "Gabriel Perez - gabrielmpp2@gmail.com"
 date: "`r Sys.Date()`"
-output:
-  rmdformats::readthedown:
-    highlight: kate
+
 ---
   
   
   
   
-__Bem vindo ao curso de R do IAG/USP 2018__  
+# Bem vindo ao curso de introdução ao ![](R.png)
+
   
+# Referências principais  
+
+http://material.curso-r.com  
+
+http://adv-r.had.co.nz/   
+
+http://r-statistics.co/
+
   
-  
-![](R.png)

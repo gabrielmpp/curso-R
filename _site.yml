@@ -9,6 +9,9 @@ navbar:
       href: Parte1.html
     - text: "Parte 2"
       href: Parte2.html
+    - test: "Parte 3"
+      href: Parte3.html
 output:
+  theme: journal
   html_document:
     css: style.css
