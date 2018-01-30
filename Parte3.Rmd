@@ -12,6 +12,8 @@ O pacote ncdf4 faz uma interface com a biblioteca netcdf que deve estar compilad
 
 ```{r}
 library(ncdf4)
+library(raster);library(RColorBrewer);library(raster);library(rasterVis);library(sp)
+library(maptools);library(colorspace)
 
 nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps005.nc")
 
@@ -23,6 +25,41 @@ nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps0
   
 A maneira mais eficiente de trabalhar com arquivos netcdf no R é utilizando o pacote "raster". Raster é um tipo de arquivo muito utilizado para dados geoespaciais. Vamos explorar essa referência:  
   
-http://www.datacarpentry.org/R-spatial-raster-vector-lesson/
+http://www.datacarpentry.org/R-spatial-raster-vector-lesson/  
+  
+Vamos abrir nosso ncdf como raster usando a função `brick`, que considera um conjunto de rasters "empilhados".  
+  
+```{r}
+library(raster)
+prec_AS <- brick("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps005.nc")
+library(lattice)
+library(latticeExtra)
+
+levelplot(prec_AS[[1]], margin = FALSE)
+
+
+```
+
+__Exercício 1__  
+  
+Extraia a série temporal do ponto de grade mais próximo à estação meteorológica que você usou na Parte 2 do curso. Faça uma regressão linear múltipla para tentar   
+ 
+__Exercício 2__
+
+Campo médio de precipitação no verão
+  
+__Exercício 3__  
+  
+PCA espacial meses de verão    
+  
+__ Série temporal da média no estado de São Paulo
+
+Mapa de correlação com índices climáticos...
+
+
+  
+
+  
+  
 # ShapeFiles
 # Recortando rasters

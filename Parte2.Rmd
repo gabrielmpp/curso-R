@@ -85,10 +85,12 @@ Para começarmos a fazer algumas análises estatísticas no R, vamos utilizar da
 
 > https://drive.google.com/open?id=1LLE61RbQ1EhFpwSSZzTsAIN0kbVSZwxw
 
-Agora vamos criar um projeto no RStudio chamado "AnaliseINMET". Uma vez criado o projeto, vamos mover os dados baixados para um diretório chamado "dados" dentro do diretório do projeto. Dessa forma o acesso fica mais simples. Abra um novo script no projeto e salve com algum nome como "analise.R". Escolha uma estação e dentro do script, digite:  
+Agora vamos criar um projeto no RStudio chamado "AnaliseINMET". Uma vez criado o projeto, vamos mover os dados baixados para um diretório chamado "dados" dentro do diretório do projeto. Dessa forma o acesso fica mais simples. Abra um novo script no projeto e salve com algum nome como "analise.R". Escolha uma das estações diponíveis e abra o arquivo txt no __Gedit__.  
+ 
+__Tarefa__  
+Procure a documentação da função `read.table` com a função `help("read.table")` e utilize os argumentos da para fazer a leitura da tabela considerando somente as linhas de interesse, ou seja, a partir da linha que contém os nomes das variáveis. Desejamos também manter os nomes da colunas com os nomes das variáveis.
 
-
-```{r}
+```{r, echo = FALSE}
 df_sp <- read.table("dados/inmet_saopaulo.txt",skip = 16, header = TRUE, sep = ";", row.names = NULL)
 
 # se nossa tabela fosse um arquivo Excel, basta usar o comando read.csv
@@ -181,10 +183,19 @@ Notem que a função `spec.pgram` espera como entrada uma variável do tipo "tim
 ts_temp_sp <- ts(temp_mensal$TempBulboSeco,start = 1998, end = 2018, frequency = 12) 
 class(ts_temp_sp)
 plot(ts_temp_sp) # Note que ao plotar uma variável ts o eixo x já recebe corretamente as datas
+```
 
+__Exercício__
+É uma boa prática normalizar a série temporal antes de fazer a análise de Fourier, i.e. $\bar{x}=0 $ e $x^2 \le1$. Normalize o vetor `ts_temp_sp`.
+```{r,echo=FALSE}
 # É uma boa prática normalizar a ts antes de fazer a transformada de foutier
 ts_temp_sp <- (ts_temp_sp - mean(ts_temp_sp)) / max(ts_temp_sp)
-fft_temp <- spec.pgram(ts_temp_sp, frequency  = 12, plot=FALSE)
+
+```
+  
+Depois de normalizado, vamos fazer a transformada no vetor.  
+```{r}
+fft_temp <- spec.pgram(ts_temp_sp, plot=FALSE)
 
 # Vamos examinar o objeto fft_temp
 fft_temp
@@ -205,8 +216,7 @@ df_fft_temp <- data.frame(period = fft_temp$period, spec = fft_temp$spec)
   
 Naturalmente, o plot mostra que o período anual é o mais importante para a temperatura. No entanto, vamos gerar uma tabela com os períodos mais importantes em ordem decrescente.  
   
-> Tarefa: Vamos procurar no Google como ordenar uma tabela no R usando os valores de uma coluna. Queremos ordenar
-> nossa tabela fft_temp com a coluna spec
+> Tarefa: Vamos procurar no Google como ordenar uma tabela no R usando os valores de uma coluna. Queremos ordenar nossa tabela fft_temp com a coluna spec
 
 ```{r,echo=FALSE,eval=FALSE}
 "how to sort a dataframe by columns in R - stackoverflow"
@@ -250,10 +260,16 @@ m_cor <- df_sp_num %>% na.omit() %>% cor()
 
 kable(m_cor,digits = 2)
 ```
+  
+```{r}
+library(corrplot)
+corrplot.mixed(m_cor, lower.col = "black", number.cex = .7)
 
+```
 __Para discutir__  
-  
-  
+   
+   Discutam com o colega de mesa as seguintes questões.
+   
     - Por que a temperatura e a direção do vento se correlacionam positivamente?  
     
     - Por que a temperatura e a nebulosidade se correlacionam negativamente?  
@@ -278,10 +294,21 @@ df_lm <- df_sp[ , c(3,4,5,6,7,8,9)]
 normalize <- function (x) {
   x/max(x,na.rm = TRUE)
 }
+```
 
+
+__Exercício__
+Usando o comando `apply`, aplique a função `normalize` que acabamos de criar nas colunas do dataframe `df_lm`. Verifique se a saída desse comando será da classe `data.frame`, caso não seja, transforme nessa classe.  
+  
+  
+```{r, echo = FALSE}
 df_lm <- as.data.frame(apply(df_lm, 2, normalize)) # estamos aplicando o as.data.frame pois o apply retorna uma matriz
 
-modLinear <- lm(Nebulosidade ~ UmidadeRelativa, data = df_lm)
+```
+
+Finalmente, vamos aplicar o modelo linear:
+```{r}
+modLinear <- lm(TempBulboSeco ~ PressaoAtmEstacao, data = df_lm)
 
 ```
   
@@ -295,21 +322,26 @@ summary(modLinear)
 
 ```
   
-Volte na tabela de correlação e compare o coeficiente de pearson com o R².  
+
+Volte na tabela de correlação e compare o coeficiente de pearson com o R² da regressão.  
   
 É possível plotar a reta da regressão linear:  
   
 ```{r}
-plot(x = df_lm$UmidadeRelativa, y = df_lm$Nebulosidade, xlim = c(0,2), ylim = c(0,2)) 
+plot(x = df_lm$PressaoAtmEstacao, y = df_lm$TempBulboSeco) 
 abline(a = modLinear$coefficients[1], b = modLinear$coefficients[2], col = "red")
 ```
 
-O gráfico ficou horrível! Isso acontece pois a nebulosidade é uma variável não-contínua. Os valores são categóricos (discretos), mas possuem um sentido de ordem, sendo 0 o caso sem nuvens e 1 a situação overcast. Portanto, embora não seja a melhor opção, é possível obter alguma informação através da regressão linear.  
+
   
 __Atividade__
   
 
 Aplique a regressão linear múltipla considerando todas as variáveis do `df_lm` e interprete a saída da função `summary`. Dica: é necessário adaptar a fórmula da função `lm()`. Se não encontrar ajuda na documentação da função, busque no Google.  
+
+---
+
+Se quisermos prever uma variável categórica (não-contínua) a regressão linear não é o modelo mais adequado. Existem outros modelos mais adequados como a regressão logística 
   
 ## Regressão logística  
   
@@ -412,6 +444,12 @@ g <- g + theme(legend.direction = 'horizontal',
                legend.position = 'top')
 print(g)
 ```
+  
+  
+__Salvando o output gráfico__  
+  
+Para salvar os gráficos do R, existem as funções png(), gif(), jpeg(), tiff, pdf(), entre outras. Procure na documentação do R sobre a função png() e exporte o gráfico que fizemos acima.  
+  
 
 # Aprimorando os gráficos com o ggplot2
   
@@ -426,5 +464,11 @@ http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
   
 # Exercício  
   
-Reproduza os plots da parte 3 usando o ggplot2 e pense em um novo plot baseado nas ideias do top50.
+1 - Reproduza os plots da parte 2 usando o ggplot2 e pense em um novo plot baseado nas ideias do top50. Salve a saída dos plots que fizer e envie para `gabrielmpp2@gmail.com`.  
+  
+
+2 - Explore as formas de plotar a matriz de correlação sugeridas no manual abaixo. Plote a matriz de correlação que exploramos hoje e envie para o mesmo e-mail.  
+  
+3 - Instale o pacote openair e use a função windrose para fazer um plot tipo rosa dos ventos somente com os dados da estação meteorológica escolhida nos meses de Dezembro, Janeiro e Fevereiro
+
 
