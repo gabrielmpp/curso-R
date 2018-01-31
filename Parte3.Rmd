@@ -8,41 +8,103 @@ output:
 ---
 # Abrindo um NetCDF no R
 
-O pacote ncdf4 faz uma interface com a biblioteca netcdf que deve estar compilada no computador para a execução do pacote. Vamos examinar um arquivo netcdf.
+O pacote ncdf4 faz uma interface com a biblioteca netcdf que deve estar compilada no computador para a instalação do ncdf4. Vamos examinar um arquivo netcdf.
 
 ```{r}
 library(ncdf4)
-library(raster);library(RColorBrewer);library(raster);library(rasterVis);library(sp)
-library(maptools);library(colorspace)
 
-nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps005.nc")
+
+nc <- nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps015.nc")
 
 ```
 
 # Raster  
   
-É possível fazer análises e plots com os arquivos netcdf no R, no entanto, este não é o formato mais apropriado pois os arquivos ocupam muito espaço na memória e o processamento não é eficiente.  
-  
-A maneira mais eficiente de trabalhar com arquivos netcdf no R é utilizando o pacote "raster". Raster é um tipo de arquivo muito utilizado para dados geoespaciais. Vamos explorar essa referência:  
+É possível fazer análises e plots com os arquivos netcdf no R, no entanto, este não é o formato mais apropriado. O R possui mais recursos para trabalhar com arquivos no formato raster. Esse tipo de arquivo é muito utilizado para dados geoespaciais. Vamos explorar essa referência:
   
 http://www.datacarpentry.org/R-spatial-raster-vector-lesson/  
   
-Vamos abrir nosso ncdf como raster usando a função `brick`, que considera um conjunto de rasters "empilhados".  
-  
+Nosso ncdf consiste em um campo espacial com vários intervalos de tempo, por isso, vamos utilizar a função "brick" para ler esse bloco de campos espaciais "empilhados".
+
 ```{r}
 library(raster)
-prec_AS <- brick("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps005.nc")
-library(lattice)
-library(latticeExtra)
+prec_AS <- brick("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps_025.nc")
+prec_AS
+```
+Depois de examinar o conteúdo do raster, vamos fazer o display dos campos. Para selecionar um intervalo de tempo específico, basta indexar o valor do tempo com dois colchetes.
 
-levelplot(prec_AS[[1]], margin = FALSE)
 
+```{r}
+plot(prec_AS[[1]])
+plot(prec_AS[[2]])
+hist(prec_AS[[1]])
+summary(prec_AS[[1]])
+
+```
+Agora vamos melhorar a visualização com a função "levelplot" do pacote lattice. Vamos aproveitar para carregar outras bibliotecas visuais que iremos usar.
+```{r}
+library(raster);library(RColorBrewer);library(raster);library(rasterVis);library(sp)
+library(maptools);library(colorspace)
+
+levelplot(prec_AS[[1]])
+```
+
+O comando levelplot gerou um histograma das linhas e das colunas do raster nas margens do plot. Apesar de ser interessante, em geral não queremos esse tipo de visualização, então basta utilizar o argumento `margin=FALSE`.
+
+```{r}
+levelplot(chirps_AS[[1]],margin=FALSE)
+```
+
+Podemos alterar a paleta de cores no argumento `par.settings` da função `levelplot`. Expetimente colocar essas paletas no argumento `par.settings`: YlOrRdTheme, BuRdTheme, RdBuTheme, GrTheme, e BTCTheme 
+```{r}
+levelplot(chirps_AS[[1]],margin=FALSE,par.settings=RdBuTheme)
 
 ```
 
+O pacote Lattice também disponibiliza a função `contourplot`, que plota as linhas de contorno. Vamos tentar adicionar as linhas de contorno no plot anterior:  
+  
+```{r}
+levelplot(chirps_AS[[1]],margin=FALSE,par.settings=RdBuTheme)+
+  contourplot(chirps_AS[[1]],at=c(50,200,500,800))
+
+```
+
+Podemos alterar diminuir a resolução do raster com o comando `aggregate` e aumentar com o comando `disaggregate`. Note que, ao aumentar a resolução, você está fazendo uma interpolação.
+```{r}
+library(rgdal)
+chirps_AS_LowRes <- aggregate(chirps_AS,factor=2)
+levelplot(chirps_AS_LowRes[[1]],margin=FALSE)
+```
+  
+
+Podemos cortar o arquivo raster em um outro domínio alterando a extensão dele como a função extent.  
+  
+```{r}
+e<-extent(-55,-45,-30,-20)
+chirps_SE<-crop(chirps_AS,e)
+levelplot(chirps_SE[[1]])
+```
+Agora vamos plotar shapefiles na nossa 
+```{r}
+shape_estados<- readShapePoly("/media/gabriel/Novo volume/Mestrado/estados_2010.shp")
+shape_SA<- readShapePoly("/media/gabriel/Novo volume/Mestrado/South_America/South_America.shp")
+
+p<-levelplot(chirps_AS[[1]], margin=FALSE)
+  p+layer(sp.lines(shape_estados,lwd=1,col='darkgrey'))+
+  layer(sp.lines(shape_SA,lwd=1.8,col='black'))
+```
+  
+Podemos usar o shapefile para mascarar o raster e usar somente os pontos internos a ele.  
+  
+```{r}
+chirps_SP <- mask(chirps_SE,shape_estados[shape_estados$nome=="S\xe3o Paulo",])
+levelplot(chirps_SP[[1]])
+```
+
+
 __Exercício 1__  
   
-Extraia a série temporal do ponto de grade mais próximo à estação meteorológica que você usou na Parte 2 do curso. Faça uma regressão linear múltipla para tentar   
+Extraia a série temporal do ponto de grade mais próximo à estação meteorológica que você usou na Parte 2 do curso. Faça uma regressão linear múltipla para tentar prever a precipitação
  
 __Exercício 2__
 
