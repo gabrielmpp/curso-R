@@ -52,27 +52,27 @@ levelplot(prec_AS[[1]])
 O comando levelplot gerou um histograma das linhas e das colunas do raster nas margens do plot. Apesar de ser interessante, em geral não queremos esse tipo de visualização, então basta utilizar o argumento `margin=FALSE`.
 
 ```{r}
-levelplot(chirps_AS[[1]],margin=FALSE)
+levelplot(prec_AS[[1]],margin=FALSE)
 ```
 
 Podemos alterar a paleta de cores no argumento `par.settings` da função `levelplot`. Expetimente colocar essas paletas no argumento `par.settings`: YlOrRdTheme, BuRdTheme, RdBuTheme, GrTheme, e BTCTheme 
 ```{r}
-levelplot(chirps_AS[[1]],margin=FALSE,par.settings=RdBuTheme)
+levelplot(prec_AS[[1]],margin=FALSE,par.settings=RdBuTheme)
 
 ```
 
 O pacote Lattice também disponibiliza a função `contourplot`, que plota as linhas de contorno. Vamos tentar adicionar as linhas de contorno no plot anterior:  
   
 ```{r}
-levelplot(chirps_AS[[1]],margin=FALSE,par.settings=RdBuTheme)+
-  contourplot(chirps_AS[[1]],at=c(50,200,500,800))
+levelplot(prec_AS[[1]],margin=FALSE,par.settings=RdBuTheme)+
+  contourplot(prec_AS[[1]],at=c(50,200,500,800))
 
 ```
 
 Podemos alterar diminuir a resolução do raster com o comando `aggregate` e aumentar com o comando `disaggregate`. Note que, ao aumentar a resolução, você está fazendo uma interpolação.
 ```{r}
 library(rgdal)
-chirps_AS_LowRes <- aggregate(chirps_AS,factor=2)
+chirps_AS_LowRes <- aggregate(prec_AS,factor=2)
 levelplot(chirps_AS_LowRes[[1]],margin=FALSE)
 ```
   
@@ -81,7 +81,7 @@ Podemos cortar o arquivo raster em um outro domínio alterando a extensão dele 
   
 ```{r}
 e<-extent(-55,-45,-30,-20)
-chirps_SE<-crop(chirps_AS,e)
+chirps_SE<-crop(prec_AS,e)
 levelplot(chirps_SE[[1]])
 ```
 Agora vamos plotar shapefiles na nossa 
