@@ -6,15 +6,62 @@ output:
   rmdformats::readthedown:
     highlight: kate
 ---
+# Plot de rosa dos ventos  
+  
+O último exercício da parte 3 pede um plot de rosa dos ventos com o pacote `openair`. Vamos ver como fazer:  
+  
+```{r}
+library(openair)
+library(dplyr) # Para a função rename
+library(RColorBrewer)
+
+## Vamos usar nosso dataset de dados do INMET
+
+df_sp <- as.data.frame(read.table(header=TRUE,skip=16,file="/media/gabriel/Novo volume/Curso-R/curso-R/dados/inmet_saopaulo.txt",sep=";"))
+
+#Retirando a coluna X e a coluna EstaÃ§Ã£o
+df_sp$X <- NULL
+df_sp$Estacao <- NULL
+
+#Formatando data
+df_sp$Data <- as.Date(df_sp$Data,format="%d/%m/%Y")
+
+# Gerar coluna de mês   
+df_sp$Mes <- format(df_sp$Data,"%m")
+
+df_verao <- df_sp[df_sp$Mes == "02" | df_sp$Mes == "01" | df_sp$Mes == "12", ]
+df_verao$DirecaoVento[which(df_verao$DirecaoVento==360)]<-0
+df_verao$DirecaoVento<-df_verao$DirecaoVento*10
+df_verao <- rename(df_verao, ws=VelocidadeVento,wd=DirecaoVento) ## dplyr
+library(openair)
+# Vamos escolher a cor do plot
+display.brewer.all()
+
+windRose(df_verao,angle = 45,paddle = FALSE,cols = brewer.pal(4,"Blues"))
+
+percentileRose(df_verao,pollutant = "UmidadeRelativa",key.position = "right", angle = 10, smooth=FALSE,percentile=c(25, 50, 75, 90, 95, 99, 99.9))
+  
+```
+
+Agora vamos fazer uma rosa dos ventos para cada mês
+```{r}
+df_sp$DirecaoVento[which(df_verao$DirecaoVento==360)]<-0
+df_sp$DirecaoVento<-df_sp$DirecaoVento*10
+df_sp<- rename(df_sp, ws=VelocidadeVento,wd=DirecaoVento) ## dplyr
+
+windRose(df_sp,angle = 45,paddle = FALSE,cols = brewer.pal(4,"Blues"),type="Mes")
+
+```
+
+
 # Abrindo um NetCDF no R
 
 O pacote ncdf4 faz uma interface com a biblioteca netcdf que deve estar compilada no computador para a instalação do ncdf4. Vamos examinar um arquivo netcdf.
 
-```{r}
+```{r,eval=FALSE}
 library(ncdf4)
 
-
-nc <- nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps015.nc")
+nc_open("/media/gabriel/Novo volume/Mestrado/chirpsMonthlyNCDF/chirps_AS/chirps015.nc")
 
 ```
 
